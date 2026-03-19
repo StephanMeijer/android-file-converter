@@ -7,12 +7,16 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.stephanmeijer.fileconverter.navigation.AboutScreen
 import com.stephanmeijer.fileconverter.navigation.ConverterScreen
+import com.stephanmeijer.fileconverter.ui.components.rememberFilePicker
 import com.stephanmeijer.fileconverter.ui.screens.AboutScreenContent
+import com.stephanmeijer.fileconverter.ui.screens.ConverterScreenContent
+import com.stephanmeijer.fileconverter.ui.viewmodel.ConverterViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -32,7 +36,14 @@ fun FileConverterApp() {
                     )
                 }
             ) { padding ->
-                Text("Converter screen", modifier = Modifier.padding(padding))
+                val converterViewModel: ConverterViewModel = viewModel()
+                val pickFile = rememberFilePicker(onFilePicked = converterViewModel::onFilePicked)
+                ConverterScreenContent(
+                    viewModel = converterViewModel,
+                    onPickFile = pickFile,
+                    onConvert = { /* wired in Task 11 */ },
+                    modifier = Modifier.padding(padding)
+                )
             }
         }
         composable<AboutScreen> {
