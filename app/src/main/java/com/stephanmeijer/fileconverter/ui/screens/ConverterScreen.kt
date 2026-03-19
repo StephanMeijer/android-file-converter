@@ -6,6 +6,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.InsertDriveFile
+import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.SwapHoriz
 import androidx.compose.material.icons.filled.UploadFile
 import androidx.compose.material3.*
@@ -25,6 +26,7 @@ fun ConverterScreenContent(
     viewModel: ConverterViewModel,
     onPickFile: () -> Unit,
     onConvert: () -> Unit,
+    onSave: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -62,7 +64,21 @@ fun ConverterScreenContent(
             }
             is ConversionState.Success -> {
                 ElevatedCard(colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.primaryContainer), modifier = Modifier.fillMaxWidth()) {
-                    Text("Conversion complete!", Modifier.padding(16.dp), color = MaterialTheme.colorScheme.onPrimaryContainer, style = MaterialTheme.typography.titleMedium)
+                    Column(Modifier.padding(16.dp)) {
+                        Text("Conversion complete!", color = MaterialTheme.colorScheme.onPrimaryContainer, style = MaterialTheme.typography.titleMedium)
+                        if (state.result.warnings.isNotEmpty()) {
+                            Spacer(Modifier.height(4.dp))
+                            Text("Warnings: ${state.result.warnings.size}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f))
+                        }
+                        Spacer(Modifier.height(8.dp))
+                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                            FilledTonalButton(onClick = onSave) {
+                                Icon(Icons.Default.Save, contentDescription = null, Modifier.size(18.dp))
+                                Spacer(Modifier.width(4.dp))
+                                Text("Save")
+                            }
+                        }
+                    }
                 }
             }
             is ConversionState.Idle -> {}
