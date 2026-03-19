@@ -1,0 +1,25 @@
+# Gradle
+.gradle/
+build/
+*.apk
+*.aab
+
+# Local properties
+local.properties
+
+# WebAssembly
+*.wasm
+*.cwasm
+
+# Pandoc assets
+app/src/main/assets/pandoc*
+
+# IDE
+.idea/
+*.iml
+*.iws
+*.ipr
+.DS_Store
+
+# Build outputs
+app/build/

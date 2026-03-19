@@ -1,0 +1,4 @@
+# ninja log v5
+0	22	1773960981193010178	CMakeFiles/pandoc_bridge.dir/pandoc_bridge.cpp.o	be5704054b6e5049
+22	54	1773960981226344583	/home/steve/Projects/github.com/StephanMeijer/android-file-converter/app/build/intermediates/cxx/Debug/242i245r/obj/arm64-v8a/libpandoc_bridge.so	449518009d150642
+0	20	1773960997110640074	/home/steve/Projects/github.com/StephanMeijer/android-file-converter/app/build/intermediates/cxx/Debug/242i245r/obj/arm64-v8a/libpandoc_bridge.so	449518009d150642
