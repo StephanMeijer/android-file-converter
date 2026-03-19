@@ -1,7 +1,0 @@
-[
-{
-  "directory": "/home/steve/Projects/github.com/StephanMeijer/android-file-converter/app/.cxx/Debug/242i245r/arm64-v8a",
-  "command": "/home/steve/Android/sdk/ndk/28.0.12433566/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++ --target=aarch64-none-linux-android26 --sysroot=/home/steve/Android/sdk/ndk/28.0.12433566/toolchains/llvm/prebuilt/linux-x86_64/sysroot -Dpandoc_bridge_EXPORTS -I/home/steve/Projects/github.com/StephanMeijer/android-file-converter/app/src/main/cpp/wasmtime/include -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -fno-limit-debug-info  -fPIC -o CMakeFiles/pandoc_bridge.dir/pandoc_bridge.cpp.o -c /home/steve/Projects/github.com/StephanMeijer/android-file-converter/app/src/main/cpp/pandoc_bridge.cpp",
-  "file": "/home/steve/Projects/github.com/StephanMeijer/android-file-converter/app/src/main/cpp/pandoc_bridge.cpp"
-}
-]

@@ -15,15 +15,10 @@ android {
         targetSdk = 35
         versionCode = 1
         versionName = "1.0.0"
-        ndkVersion = "28.0.12433566"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary = true
-        }
-
-        ndk {
-            abiFilters += setOf("arm64-v8a")
         }
     }
 
@@ -50,12 +45,6 @@ android {
         compose = true
     }
 
-    externalNativeBuild {
-        cmake {
-            path = file("src/main/cpp/CMakeLists.txt")
-        }
-    }
-
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
@@ -79,6 +68,11 @@ dependencies {
 
     // Serialization
     implementation(libs.kotlinx.serialization.json)
+
+    // JavaScriptEngine (V8 sandbox for WASM execution)
+    implementation(libs.androidx.javascriptengine)
+    implementation(libs.kotlinx.coroutines.guava)
+    implementation(libs.guava)
 
     // Debug
     debugImplementation(libs.compose.ui.tooling)

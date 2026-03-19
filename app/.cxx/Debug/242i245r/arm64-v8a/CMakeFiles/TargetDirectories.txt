@@ -1,3 +1,0 @@
-/home/steve/Projects/github.com/StephanMeijer/android-file-converter/app/.cxx/Debug/242i245r/arm64-v8a/CMakeFiles/pandoc_bridge.dir
-/home/steve/Projects/github.com/StephanMeijer/android-file-converter/app/.cxx/Debug/242i245r/arm64-v8a/CMakeFiles/edit_cache.dir
-/home/steve/Projects/github.com/StephanMeijer/android-file-converter/app/.cxx/Debug/242i245r/arm64-v8a/CMakeFiles/rebuild_cache.dir

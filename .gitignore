@@ -7,12 +7,10 @@ build/
 # Local properties
 local.properties
 
-# WebAssembly
-*.wasm
+# WebAssembly (large binaries)
+app/src/main/assets/pandoc.wasm
 *.cwasm
-
-# Pandoc assets
-app/src/main/assets/pandoc*
+tools/pandoc.wasm
 
 # IDE
 .idea/
@@ -23,3 +21,4 @@ app/src/main/assets/pandoc*
 
 # Build outputs
 app/build/
+app/.cxx/
