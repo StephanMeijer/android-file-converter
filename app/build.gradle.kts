@@ -50,6 +50,12 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+
+    testOptions {
+        unitTests.all {
+            it.useJUnitPlatform()
+        }
+    }
 }
 
 dependencies {
@@ -76,4 +82,15 @@ dependencies {
 
     // Debug
     debugImplementation(libs.compose.ui.tooling)
+
+    // Unit tests
+    testImplementation(libs.junit5.jupiter)
+    testImplementation(libs.mockk)
+    testImplementation(libs.truth)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testRuntimeOnly(libs.junit5.engine)
+
+    // Instrumented tests
+    androidTestImplementation(libs.androidx.test.runner)
+    androidTestImplementation(libs.compose.ui.test.junit4)
 }
