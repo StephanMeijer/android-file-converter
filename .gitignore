@@ -22,3 +22,10 @@ tools/pandoc.wasm
 # Build outputs
 app/build/
 app/.cxx/
+
+# Kotlin compiler errors (temp files)
+.kotlin/errors/
+
+# Tool config dirs (not project files)
+claude-code/
+opencode/
