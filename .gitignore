@@ -29,3 +29,8 @@ app/.cxx/
 # Tool config dirs (not project files)
 claude-code/
 opencode/
+
+# Real FFmpeg binary (built via tools/build-ffmpeg.sh, ~40-50MB)
+# The 4KB stub IS tracked in git; the real binary must be built locally.
+# After first successful build, uncomment the line below to exclude it:
+# app/src/main/jniLibs/arm64-v8a/libffmpeg.so
