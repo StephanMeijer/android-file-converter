@@ -38,10 +38,8 @@ async function initPandoc() {
   var options = { debug: false };
   var wasi = new WASI(args, env, fds, options);
 
-  // Load WASM binary from Android's named data channel (no fetch() available)
-  var wasmBuffer = android.consumeNamedDataAsArrayBuffer('pandoc-wasm');
-
-  var result = await WebAssembly.instantiate(wasmBuffer, {
+  // Load WASM via fetch — works in WebView with WebViewAssetLoader (full Web API)
+  var result = await WebAssembly.instantiateStreaming(fetch('pandoc.wasm'), {
     wasi_snapshot_preview1: wasi.wasiImport,
   });
 

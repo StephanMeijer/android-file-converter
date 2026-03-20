@@ -1,5 +1,6 @@
 package com.stephanmeijer.fileconverter
 
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -51,65 +52,53 @@ fun FileConverterApp() {
         composable<ConverterScreen> {
             val pickFile = rememberFilePicker(onFilePicked = converterViewModel::onFilePicked)
             val saveOutput = rememberOutputSaver { _ -> }
-            Scaffold(
-                topBar = {
-                    TopAppBar(
-                        title = { Text("File Converter") },
-                        actions = {
-                            IconButton(onClick = { navController.navigate(AboutScreen) }) {
-                                Icon(Icons.Default.Info, contentDescription = "About")
-                            }
-                        }
-                    )
-                }
-            ) { padding ->
-                ConverterScreenContent(
-                    viewModel = converterViewModel,
-                    onPickFile = pickFile,
-                    onConvert = {
-                        scope.launch {
-                            converterViewModel.updateConversionState(ConversionState.Converting)
-                            try {
-                                val file = converterViewModel.selectedFile!!
-                                val inputContent = file.cachedPath.readText()
-                                val result = PandocEngine.convert(
-                                    input = inputContent,
-                                    fromFormat = converterViewModel.inputFormat!!,
-                                    toFormat = converterViewModel.outputFormat!!,
-                                )
-                                if (result.error.isNullOrBlank()) {
-                                    converterViewModel.updateConversionState(
-                                        ConversionState.Success(result)
-                                    )
-                                } else {
-                                    converterViewModel.updateConversionState(
-                                        ConversionState.Error(result.error)
-                                    )
-                                }
-                            } catch (e: Exception) {
+            ConverterScreenContent(
+                viewModel = converterViewModel,
+                onPickFile = pickFile,
+                onNavigateToAbout = { navController.navigate(AboutScreen) },
+                onConvert = {
+                    scope.launch {
+                        converterViewModel.updateConversionState(ConversionState.Converting)
+                        try {
+                            val file = converterViewModel.selectedFile!!
+                            val inputContent = file.cachedPath.readText()
+                            val result = PandocEngine.convert(
+                                input = inputContent,
+                                fromFormat = converterViewModel.inputFormat!!,
+                                toFormat = converterViewModel.outputFormat!!,
+                            )
+                            if (result.error.isNullOrBlank()) {
                                 converterViewModel.updateConversionState(
-                                    ConversionState.Error("Conversion failed: ${e.message}")
+                                    ConversionState.Success(result)
+                                )
+                            } else {
+                                converterViewModel.updateConversionState(
+                                    ConversionState.Error(result.error)
                                 )
                             }
-                        }
-                    },
-                    onSave = {
-                        val state = converterViewModel.conversionState
-                        if (state is ConversionState.Success) {
-                            val inputName = converterViewModel.selectedFile!!
-                                .displayName.substringBeforeLast('.')
-                            val ext = MimeTypes.extensionForFormat(
-                                converterViewModel.outputFormat!!
+                        } catch (e: Exception) {
+                            converterViewModel.updateConversionState(
+                                ConversionState.Error("Conversion failed: ${e.message}")
                             )
-                            val mime = MimeTypes.forFormat(
-                                converterViewModel.outputFormat!!
-                            )
-                            saveOutput("$inputName.$ext", mime, state.result.output)
                         }
-                    },
-                    modifier = Modifier.padding(padding)
-                )
-            }
+                    }
+                },
+                onSave = {
+                    val state = converterViewModel.conversionState
+                    if (state is ConversionState.Success) {
+                        val inputName = converterViewModel.selectedFile!!
+                            .displayName.substringBeforeLast('.')
+                        val ext = MimeTypes.extensionForFormat(
+                            converterViewModel.outputFormat!!
+                        )
+                        val mime = MimeTypes.forFormat(
+                            converterViewModel.outputFormat!!
+                        )
+                        saveOutput("$inputName.$ext", mime, state.result.output)
+                    }
+                },
+                modifier = Modifier.fillMaxSize()
+            )
         }
         composable<AboutScreen> {
             Scaffold(

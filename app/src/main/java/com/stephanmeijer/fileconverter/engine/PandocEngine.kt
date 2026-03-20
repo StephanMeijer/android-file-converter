@@ -1,21 +1,27 @@
 package com.stephanmeijer.fileconverter.engine
 
+import android.annotation.SuppressLint
 import android.content.Context
+import android.util.Base64
 import android.util.Log
-import androidx.javascriptengine.IsolateStartupParameters
-import androidx.javascriptengine.JavaScriptIsolate
-import androidx.javascriptengine.JavaScriptSandbox
+import android.webkit.JavascriptInterface
+import android.webkit.WebResourceRequest
+import android.webkit.WebResourceResponse
+import android.webkit.WebView
+import android.webkit.WebViewClient
+import androidx.webkit.WebViewAssetLoader
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.guava.await
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
+import kotlin.coroutines.resume
 
 private const val TAG = "PandocEngine"
-private const val HEAP_SIZE_BYTES: Long = 512L * 1024 * 1024
 
 data class ConversionResult(
     val output: String,
@@ -32,110 +38,84 @@ data class PandocFormats(
 private data class RawConversionResult(
     val stdout: String,
     val stderr: String,
-    // warnings is a JSON string nested inside the outer JSON (double-encoded)
     val warnings: String,
-)
-
-@Serializable
-private data class PandocWarning(
-    val message: String = "",
 )
 
 object PandocEngine {
 
-    @Volatile
-    private var initialized: Boolean = false
-
+    @Volatile private var initialized = false
     private val initMutex = Mutex()
-
-    private var sandbox: JavaScriptSandbox? = null
-    private var isolate: JavaScriptIsolate? = null
-
+    private var webView: WebView? = null
     private val json = Json { ignoreUnknownKeys = true }
 
+    val isInitialized: Boolean get() = initialized
+
+    @SuppressLint("SetJavaScriptEnabled")
     suspend fun initialize(context: Context) {
         if (initialized) return
         initMutex.withLock {
             if (initialized) return
-            withContext(Dispatchers.IO) {
-                doInitialize(context)
+
+            val initDeferred = CompletableDeferred<Unit>()
+
+            withContext(Dispatchers.Main) {
+                val assetLoader = WebViewAssetLoader.Builder()
+                    .setDomain("appassets.androidplatform.net")
+                    .addPathHandler("/assets/", WebViewAssetLoader.AssetsPathHandler(context))
+                    .build()
+
+                val wv = WebView(context.applicationContext).apply {
+                    settings.javaScriptEnabled = true
+                    settings.allowFileAccess = false
+                    settings.allowContentAccess = false
+
+                    webViewClient = object : WebViewClient() {
+                        override fun shouldInterceptRequest(
+                            view: WebView,
+                            request: WebResourceRequest
+                        ): WebResourceResponse? = assetLoader.shouldInterceptRequest(request.url)
+                    }
+
+                    addJavascriptInterface(
+                        object {
+                            @JavascriptInterface
+                            fun onInitComplete(result: String) {
+                                Log.i(TAG, "Pandoc initialized: $result")
+                                initDeferred.complete(Unit)
+                            }
+                            @JavascriptInterface
+                            fun onInitError(error: String) {
+                                Log.e(TAG, "Pandoc init error: $error")
+                                initDeferred.completeExceptionally(RuntimeException("Pandoc init failed: $error"))
+                            }
+                        },
+                        "Android"
+                    )
+
+                    loadUrl("https://appassets.androidplatform.net/assets/pandoc_host.html")
+                }
+                webView = wv
             }
+
+            initDeferred.await()
             initialized = true
+            Log.i(TAG, "PandocEngine ready")
         }
     }
 
-    private suspend fun doInitialize(context: Context) {
-        check(JavaScriptSandbox.isSupported()) {
-            "JavaScriptSandbox is not supported on this device"
-        }
-
-        val sb = JavaScriptSandbox.createConnectedInstanceAsync(context).await()
-        sandbox = sb
-
-        check(sb.isFeatureSupported(JavaScriptSandbox.JS_FEATURE_WASM_COMPILATION)) {
-            "Device does not support WASM compilation"
-        }
-        check(sb.isFeatureSupported(JavaScriptSandbox.JS_FEATURE_PROVIDE_CONSUME_ARRAY_BUFFER)) {
-            "Device does not support provideNamedData / consumeNamedDataAsArrayBuffer"
-        }
-        check(sb.isFeatureSupported(JavaScriptSandbox.JS_FEATURE_PROMISE_RETURN)) {
-            "Device does not support returning Promises from evaluateJavaScriptAsync"
-        }
-
-        val params = IsolateStartupParameters().apply {
-            maxHeapSizeBytes = HEAP_SIZE_BYTES
-        }
-        val iso = sb.createIsolate(params)
-        isolate = iso
-
-        iso.addOnTerminatedCallback(
-            java.util.concurrent.Executor { it.run() },
-            androidx.core.util.Consumer { info ->
-                Log.e(TAG, "JS isolate terminated: $info")
-                initialized = false
-                isolate = null
-            },
-        )
-
-        val wasiShim = context.assets.open("wasi_shim.js").bufferedReader().use { it.readText() }
-        iso.evaluateJavaScriptAsync(wasiShim).await()
-        Log.d(TAG, "wasi_shim.js loaded")
-
-        val bridge = context.assets.open("pandoc_bridge.js").bufferedReader().use { it.readText() }
-        iso.evaluateJavaScriptAsync(bridge).await()
-        Log.d(TAG, "pandoc_bridge.js loaded")
-
-        val wasmBytes = context.assets.open("pandoc.wasm").use { it.readBytes() }
-        iso.provideNamedData("pandoc-wasm", wasmBytes)
-        Log.d(TAG, "pandoc.wasm provided (${wasmBytes.size} bytes)")
-
-        // initPandoc() is async with no return value — wrap to get a value back
-        iso.evaluateJavaScriptAsync(
-            "(async () => { await initPandoc(); return 'ok'; })()"
-        ).await()
-        Log.i(TAG, "pandoc WASM runtime initialized")
-    }
-
-    suspend fun queryVersion(): String = withContext(Dispatchers.IO) {
+    suspend fun queryVersion(): String {
         requireInitialized()
-        val raw = isolate!!.evaluateJavaScriptAsync(
-            """pandocQuery('{"query":"version"}')"""
-        ).await()
-        // pandocQuery returns JSON-encoded text: "3.9.0.2" (with quotes)
-        json.decodeFromString<String>(raw)
+        val raw = evalJs("""pandocQuery('{"query":"version"}')""")
+        return json.decodeFromString<String>(raw)
     }
 
-    suspend fun queryFormats(): PandocFormats = withContext(Dispatchers.IO) {
+    suspend fun queryFormats(): PandocFormats {
         requireInitialized()
-        val rawIn = isolate!!.evaluateJavaScriptAsync(
-            """pandocQuery('{"query":"input-formats"}')"""
-        ).await()
-        val rawOut = isolate!!.evaluateJavaScriptAsync(
-            """pandocQuery('{"query":"output-formats"}')"""
-        ).await()
-        PandocFormats(
-            inputFormats = json.decodeFromString<List<String>>(rawIn),
-            outputFormats = json.decodeFromString<List<String>>(rawOut),
+        val rawIn = evalJs("""pandocQuery('{"query":"input-formats"}')""")
+        val rawOut = evalJs("""pandocQuery('{"query":"output-formats"}')""")
+        return PandocFormats(
+            inputFormats = json.decodeFromString(rawIn),
+            outputFormats = json.decodeFromString(rawOut),
         )
     }
 
@@ -144,63 +124,62 @@ object PandocEngine {
         fromFormat: String,
         toFormat: String,
         standalone: Boolean = false,
-    ): ConversionResult = withContext(Dispatchers.IO) {
+    ): ConversionResult {
         requireInitialized()
-        val iso = isolate!!
 
-        val optionsJson = buildString {
-            append("""{"from":""")
-            append(json.encodeToString(String.serializer(), fromFormat))
-            append(""","to":""")
-            append(json.encodeToString(String.serializer(), toFormat))
-            if (standalone) append(""","standalone":true""")
-            append(""","files":["/stdin"]}""")
-        }
+        val escapedFrom = json.encodeToString(String.serializer(), fromFormat)
+        val escapedTo = json.encodeToString(String.serializer(), toFormat)
+        val optionsJson = """{"from":$escapedFrom,"to":$escapedTo${if (standalone) ""","standalone":true""" else ""},"files":["/stdin"]}"""
 
-        val escapedOptions = optionsJson
-            .replace("\\", "\\\\")
-            .replace("'", "\\'")
-            .replace("\n", "\\n")
-            .replace("\r", "\\r")
-
-        // provideNamedData avoids fragile JS string escaping for large input
-        val inputBytes = input.toByteArray(Charsets.UTF_8)
-        iso.provideNamedData("pandoc-stdin", inputBytes)
+        val inputBase64 = Base64.encodeToString(input.toByteArray(Charsets.UTF_8), Base64.NO_WRAP)
+        val escapedOptions = optionsJson.replace("\\", "\\\\").replace("'", "\\'")
 
         val jsCode = """
             (function() {
-                var inputBuf = android.consumeNamedDataAsArrayBuffer('pandoc-stdin');
-                var inputStr = new TextDecoder().decode(inputBuf);
+                var b64 = '$inputBase64';
+                var binary = atob(b64);
+                var bytes = new Uint8Array(binary.length);
+                for (var i = 0; i < binary.length; i++) { bytes[i] = binary.charCodeAt(i); }
+                var inputStr = new TextDecoder('utf-8').decode(bytes);
                 return pandocConvert('$escapedOptions', inputStr);
             })()
         """.trimIndent()
 
-        val resultJson = iso.evaluateJavaScriptAsync(jsCode).await()
-
+        val resultJson = evalJs(jsCode)
         val raw = json.decodeFromString<RawConversionResult>(resultJson)
 
         val warnings: List<String> = if (raw.warnings.isNotBlank() && raw.warnings != "[]") {
             try {
-                json.decodeFromString<List<PandocWarning>>(raw.warnings).map { it.message }
+                @Serializable data class W(val message: String = "")
+                json.decodeFromString<List<W>>(raw.warnings).map { it.message }
             } catch (_: Exception) {
                 raw.warnings.lines().filter { it.isNotBlank() }
             }
-        } else {
-            emptyList()
-        }
+        } else emptyList()
 
-        ConversionResult(
+        return ConversionResult(
             output = raw.stdout,
             warnings = warnings,
             error = raw.stderr.takeIf { it.isNotBlank() },
         )
     }
 
+    private suspend fun evalJs(code: String): String = withContext(Dispatchers.Main) {
+        suspendCancellableCoroutine { cont ->
+            webView!!.evaluateJavascript(code) { result ->
+                val value = if (result != null && result.startsWith("\"") && result.endsWith("\"")) {
+                    json.decodeFromString<String>(result)
+                } else {
+                    result ?: "null"
+                }
+                cont.resume(value)
+            }
+        }
+    }
+
     fun close() {
-        isolate?.close()
-        sandbox?.close()
-        isolate = null
-        sandbox = null
+        webView?.destroy()
+        webView = null
         initialized = false
     }
 

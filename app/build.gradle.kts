@@ -71,10 +71,8 @@ dependencies {
     // Serialization
     implementation(libs.kotlinx.serialization.json)
 
-    // JavaScriptEngine (V8 sandbox for WASM execution)
-    implementation(libs.androidx.javascriptengine)
-    implementation(libs.kotlinx.coroutines.guava)
-    implementation(libs.guava)
+    // WebView engine for WASM execution
+    implementation(libs.androidx.webkit)
 
     // Debug
     debugImplementation(libs.compose.ui.tooling)

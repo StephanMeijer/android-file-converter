@@ -25,14 +25,10 @@ fun FormatDropdown(
         modifier = modifier
     ) {
         OutlinedTextField(
-            value = if (selectedFormat != null) {
-                val name = formatDisplayName(selectedFormat)
-                if (isDetected) "$name (detected)" else name
-            } else {
-                ""
-            },
+            value = if (selectedFormat != null) formatDisplayName(selectedFormat) else "",
             onValueChange = {},
             readOnly = true,
+            singleLine = true,
             label = { Text(label) },
             placeholder = { Text("Select format...") },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },

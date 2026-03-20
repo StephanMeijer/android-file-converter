@@ -28,6 +28,7 @@ compose-material-icons-extended = { group = "androidx.compose.material", name = 
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
 kotlinx-coroutines-guava = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-guava", version.ref = "coroutines-guava" }
 guava = { group = "com.google.guava", name = "guava", version.ref = "guava" }
+androidx-webkit = { group = "androidx.webkit", name = "webkit", version = "1.12.1" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

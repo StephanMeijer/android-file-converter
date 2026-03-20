@@ -2,9 +2,11 @@ package com.stephanmeijer.fileconverter.ui.screens
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.InsertDriveFile
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.SwapHoriz
@@ -25,14 +27,35 @@ import com.stephanmeijer.fileconverter.ui.viewmodel.ConverterViewModel
 fun ConverterScreenContent(
     viewModel: ConverterViewModel,
     onPickFile: () -> Unit,
+    onNavigateToAbout: () -> Unit = {},
     onConvert: () -> Unit,
     onSave: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Column(
-        modifier = modifier.fillMaxSize().padding(16.dp),
+        modifier = modifier
+            .fillMaxSize()
+            .statusBarsPadding()
+            .padding(horizontal = 16.dp)
+            .padding(bottom = 16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
+        // Top row: title + info icon
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                "File Converter",
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+            )
+            IconButton(onClick = onNavigateToAbout) {
+                Icon(Icons.Default.Info, contentDescription = "About")
+            }
+        }
+
         FileSelectionCard(viewModel.selectedFile, onPickFile)
         FormatSelectionBar(
             viewModel.inputFormat, viewModel.outputFormat,
