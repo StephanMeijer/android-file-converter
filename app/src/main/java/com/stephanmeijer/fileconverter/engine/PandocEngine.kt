@@ -120,7 +120,7 @@ object PandocEngine {
     }
 
     suspend fun convert(
-        input: String,
+        inputBytes: ByteArray,
         fromFormat: String,
         toFormat: String,
         standalone: Boolean = false,
@@ -131,7 +131,7 @@ object PandocEngine {
         val escapedTo = json.encodeToString(String.serializer(), toFormat)
         val optionsJson = """{"from":$escapedFrom,"to":$escapedTo${if (standalone) ""","standalone":true""" else ""},"input-files":["/stdin"]}"""
 
-        val inputBase64 = Base64.encodeToString(input.toByteArray(Charsets.UTF_8), Base64.NO_WRAP)
+        val inputBase64 = Base64.encodeToString(inputBytes, Base64.NO_WRAP)
         val escapedOptions = optionsJson.replace("\\", "\\\\").replace("'", "\\'")
 
         val jsCode = """
@@ -140,8 +140,7 @@ object PandocEngine {
                 var binary = atob(b64);
                 var bytes = new Uint8Array(binary.length);
                 for (var i = 0; i < binary.length; i++) { bytes[i] = binary.charCodeAt(i); }
-                var inputStr = new TextDecoder('utf-8').decode(bytes);
-                return pandocConvert('$escapedOptions', inputStr);
+                return pandocConvertBytes('$escapedOptions', bytes);
             })()
         """.trimIndent()
 

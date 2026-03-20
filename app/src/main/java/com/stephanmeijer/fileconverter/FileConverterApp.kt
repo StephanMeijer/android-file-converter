@@ -64,10 +64,10 @@ fun FileConverterApp() {
                     scope.launch {
                         converterViewModel.updateConversionState(ConversionState.Converting)
                         try {
-                            val file = converterViewModel.selectedFile!!
-                            val inputContent = file.cachedPath.readText()
-                            val result = PandocEngine.convert(
-                                input = inputContent,
+                             val file = converterViewModel.selectedFile!!
+                             val inputBytes = file.cachedPath.readBytes()
+                             val result = PandocEngine.convert(
+                                 inputBytes = inputBytes,
                                 fromFormat = converterViewModel.inputFormat!!,
                                 toFormat = converterViewModel.outputFormat!!,
                             )

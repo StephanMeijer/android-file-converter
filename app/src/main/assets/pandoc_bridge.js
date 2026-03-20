@@ -169,3 +169,62 @@ function pandocConvert(optionsJson, stdinStr) {
     warnings: warnings
   });
 }
+
+/**
+ * Convert content using pandoc with raw bytes input.
+ * @param {string} optionsJson - JSON string with pandoc conversion options
+ * @param {Uint8Array} inputBytes - Raw input bytes (for binary formats)
+ * @returns {string} JSON string with {stdout, stderr, warnings}
+ */
+function pandocConvertBytes(optionsJson, inputBytes) {
+  var opts_bytes = new TextEncoder().encode(optionsJson);
+  var opts_ptr = _instance.exports.malloc(opts_bytes.length);
+  new Uint8Array(_instance.exports.memory.buffer, opts_ptr, opts_bytes.length)
+    .set(opts_bytes);
+
+  _fileSystem.clear();
+  var in_file = new File(new Uint8Array(), { readonly: true });
+  var out_file = new File(new Uint8Array(), { readonly: false });
+  var err_file = new File(new Uint8Array(), { readonly: false });
+  var warnings_file = new File(new Uint8Array(), { readonly: false });
+  _fileSystem.set("stdin", in_file);
+  _fileSystem.set("stdout", out_file);
+  _fileSystem.set("stderr", err_file);
+  _fileSystem.set("warnings", warnings_file);
+
+  if (inputBytes) {
+    in_file.data = inputBytes;
+  }
+
+  try {
+    _instance.exports.convert(opts_ptr, opts_bytes.length);
+  } catch (e) {
+    if (e instanceof WASIProcExit && e.code === 0) {
+    } else if (e instanceof WASIProcExit) {
+      var errText = new TextDecoder("utf-8", { fatal: false }).decode(err_file.data);
+      return JSON.stringify({
+        stdout: "",
+        stderr: errText,
+        warnings: "[]",
+        exitCode: e.code
+      });
+    } else {
+      throw e;
+    }
+  }
+
+  var stdout = new TextDecoder("utf-8", { fatal: false }).decode(out_file.data);
+  var stderr = new TextDecoder("utf-8", { fatal: false }).decode(err_file.data);
+  var rawWarnings = new TextDecoder("utf-8", { fatal: false }).decode(warnings_file.data);
+
+  var warnings = "[]";
+  if (rawWarnings && rawWarnings.length > 0) {
+    warnings = rawWarnings;
+  }
+
+  return JSON.stringify({
+    stdout: stdout,
+    stderr: stderr,
+    warnings: warnings
+  });
+}
