@@ -9,6 +9,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
+import java.io.File
 
 @Composable
 fun rememberOutputSaver(
@@ -39,6 +40,27 @@ fun rememberOutputSaver(
             launcher.launch(suggestedName)
         }
     }
+}
+
+@Composable
+fun rememberMediaOutputSaver(onSaved: (Boolean) -> Unit): (String, String, File) -> Unit {
+    val context = LocalContext.current
+    var pendingFile by remember { mutableStateOf<File?>(null) }
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.CreateDocument("*/*")
+    ) { uri: Uri? ->
+        if (uri != null && pendingFile != null) {
+            try {
+                context.contentResolver.openOutputStream(uri)?.use { out ->
+                    pendingFile!!.inputStream().use { it.copyTo(out) }
+                }
+                pendingFile!!.delete()
+                onSaved(true)
+            } catch (_: Exception) { onSaved(false) }
+        }
+        pendingFile = null
+    }
+    return remember(launcher) { { name, _, file -> pendingFile = file; launcher.launch(name) } }
 }
 
 object MimeTypes {

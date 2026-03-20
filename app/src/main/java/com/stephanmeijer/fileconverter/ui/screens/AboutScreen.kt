@@ -19,6 +19,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.stephanmeijer.fileconverter.engine.FFmpegEngine
 
 @Composable
 fun AboutScreenContent(modifier: Modifier = Modifier) {
@@ -88,6 +89,41 @@ fun AboutScreenContent(modifier: Modifier = Modifier) {
                     LinkText("Pandoc WASM", "https://github.com/nicolomarcon/pandoc-wasm", uriHandler)
                     Spacer(modifier = Modifier.height(4.dp))
                     LinkText("pandoc.org", "https://pandoc.org", uriHandler)
+                }
+            }
+        }
+
+        item {
+            Card(modifier = Modifier.fillMaxWidth()) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        text = "FFmpeg",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = "Version ${FFmpegEngine.FFMPEG_VERSION}",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "This app uses FFmpeg for audio and video conversion. " +
+                                "All conversions run entirely on your device.",
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Text(
+                        text = "FFmpeg is licensed under the GNU General Public License v2 or later (GPL v2+). " +
+                                "This application is free software; you may redistribute it under the same license.",
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    LinkText("GPL v2+ License", "https://ffmpeg.org/legal.html", uriHandler)
+                    Spacer(modifier = Modifier.height(4.dp))
+                    LinkText("FFmpeg source code", "https://git.ffmpeg.org/ffmpeg.git", uriHandler)
+                    Spacer(modifier = Modifier.height(4.dp))
+                    LinkText("ffmpeg.org", "https://ffmpeg.org", uriHandler)
                 }
             }
         }

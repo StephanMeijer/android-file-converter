@@ -17,8 +17,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.stephanmeijer.fileconverter.engine.ConversionPreset
 import com.stephanmeijer.fileconverter.engine.FormatDetector
 import com.stephanmeijer.fileconverter.engine.SelectedFile
+import com.stephanmeijer.fileconverter.ui.components.AdvancedOptions
 import com.stephanmeijer.fileconverter.ui.components.FormatDropdown
 import com.stephanmeijer.fileconverter.ui.viewmodel.ConversionState
 import com.stephanmeijer.fileconverter.ui.viewmodel.ConverterViewModel
@@ -30,6 +32,8 @@ fun ConverterScreenContent(
     onNavigateToAbout: () -> Unit = {},
     onConvert: () -> Unit,
     onSave: () -> Unit = {},
+    onPresetChanged: (ConversionPreset) -> Unit = {},
+    onCancel: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Surface(
@@ -64,7 +68,14 @@ fun ConverterScreenContent(
         FormatSelectionBar(
             viewModel.inputFormat, viewModel.outputFormat,
             viewModel.selectedFile?.detectedFormat != null && viewModel.inputFormat == viewModel.selectedFile?.detectedFormat,
+            viewModel.detectedCategory,
             viewModel::onInputFormatChanged, viewModel::onOutputFormatChanged
+        )
+        AdvancedOptions(
+            category = viewModel.detectedCategory,
+            selectedPreset = viewModel.selectedPreset,
+            onPresetChanged = onPresetChanged,
+            modifier = Modifier.fillMaxWidth()
         )
         Button(
             onClick = onConvert, enabled = viewModel.canConvert,
@@ -81,8 +92,22 @@ fun ConverterScreenContent(
                 Text("Initializing converter...")
             }
             is ConversionState.Converting -> {
-                LinearProgressIndicator(Modifier.fillMaxWidth())
+                val progress = state.progress
+                if (progress < 0f) {
+                    LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                } else {
+                    LinearProgressIndicator(
+                        progress = { progress },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Text("${(progress * 100).toInt()}%",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
                 Text("Converting...")
+                OutlinedButton(onClick = onCancel, modifier = Modifier.fillMaxWidth()) {
+                    Text("Cancel")
+                }
             }
             is ConversionState.Error -> {
                 ElevatedCard(colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.errorContainer), modifier = Modifier.fillMaxWidth()) {
@@ -97,6 +122,21 @@ fun ConverterScreenContent(
                             Spacer(Modifier.height(4.dp))
                             Text("Warnings: ${state.result.warnings.size}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f))
                         }
+                        Spacer(Modifier.height(8.dp))
+                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                            FilledTonalButton(onClick = onSave) {
+                                Icon(Icons.Default.Save, contentDescription = null, Modifier.size(18.dp))
+                                Spacer(Modifier.width(4.dp))
+                                Text("Save")
+                            }
+                        }
+                    }
+                }
+            }
+            is ConversionState.MediaSuccess -> {
+                ElevatedCard(colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.primaryContainer), modifier = Modifier.fillMaxWidth()) {
+                    Column(Modifier.padding(16.dp)) {
+                        Text("Conversion complete!", color = MaterialTheme.colorScheme.onPrimaryContainer, style = MaterialTheme.typography.titleMedium)
                         Spacer(Modifier.height(8.dp))
                         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
                             FilledTonalButton(onClick = onSave) {
@@ -151,12 +191,15 @@ private fun FileSelectionCard(selectedFile: SelectedFile?, onPickFile: () -> Uni
 @Composable
 private fun FormatSelectionBar(
     inputFormat: String?, outputFormat: String?, isInputDetected: Boolean,
+    detectedCategory: FormatDetector.Category?,
     onInputChanged: (String) -> Unit, onOutputChanged: (String) -> Unit
 ) {
+    val outputFormats = if (detectedCategory != null) FormatDetector.validOutputFormats(detectedCategory)
+                        else FormatDetector.commonOutputFormats
     Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
         FormatDropdown("From", inputFormat, FormatDetector.commonInputFormats, FormatDetector::getDisplayName, onInputChanged, Modifier.fillMaxWidth(), isDetected = isInputDetected)
         Icon(Icons.Default.ArrowDownward, "to", tint = MaterialTheme.colorScheme.onSurfaceVariant)
-        FormatDropdown("To", outputFormat, FormatDetector.commonOutputFormats, FormatDetector::getDisplayName, onOutputChanged, Modifier.fillMaxWidth())
+        FormatDropdown("To", outputFormat, outputFormats, FormatDetector::getDisplayName, onOutputChanged, Modifier.fillMaxWidth())
     }
 }
 
