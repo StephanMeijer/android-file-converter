@@ -12,6 +12,22 @@ object FormatDetector {
         "creole" to "creole", "man" to "man",
     )
 
+    private val mimeToFormatMap = mapOf(
+        "text/markdown" to "markdown", "text/x-markdown" to "markdown",
+        "text/html" to "html", "application/xhtml+xml" to "html",
+        "application/x-latex" to "latex", "text/x-latex" to "latex",
+        "text/x-rst" to "rst",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document" to "docx",
+        "application/vnd.oasis.opendocument.text" to "odt",
+        "application/epub+zip" to "epub",
+        "text/plain" to "markdown",
+        "application/json" to "json",
+        "text/csv" to "csv",
+        "text/tab-separated-values" to "tsv",
+        "application/rtf" to "rtf", "text/rtf" to "rtf",
+        "application/xml" to "docbook", "text/xml" to "docbook",
+    )
+
     val formatDisplayNames = mapOf(
         "markdown" to "Markdown", "html" to "HTML", "latex" to "LaTeX",
         "docx" to "Word (DOCX)", "odt" to "OpenDocument (ODT)", "epub" to "EPUB",
@@ -45,6 +61,9 @@ object FormatDetector {
         val ext = fileName.substringAfterLast('.', "").lowercase()
         return inputFormatMap[ext]
     }
+
+    fun detectFormatFromMime(mimeType: String): String? =
+        mimeToFormatMap[mimeType.lowercase()]
 
     fun getDisplayName(formatId: String): String =
         formatDisplayNames[formatId] ?: formatId.replaceFirstChar { it.uppercase() }
