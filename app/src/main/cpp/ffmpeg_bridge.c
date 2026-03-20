@@ -180,3 +180,32 @@ Java_com_stephanmeijer_fileconverter_engine_FFmpegBridge_nativeGetMediaDuration(
     (*env)->ReleaseStringUTFChars(env, jpath, path);
     return duration_ms;
 }
+
+/* nativeProbeStreams: returns count of audio streams in the file, or -1 on error */
+JNIEXPORT jint JNICALL
+Java_com_stephanmeijer_fileconverter_engine_FFmpegBridge_nativeProbeStreams(
+        JNIEnv *env, jclass clazz, jstring jpath) {
+    (void)clazz;
+    if (jpath == NULL) return -1;
+
+    const char *path = (*env)->GetStringUTFChars(env, jpath, NULL);
+    if (path == NULL) return -1;
+
+    AVFormatContext *fmt_ctx = NULL;
+    jint audio_streams = -1;
+
+    if (avformat_open_input(&fmt_ctx, path, NULL, NULL) == 0) {
+        if (avformat_find_stream_info(fmt_ctx, NULL) >= 0 && fmt_ctx != NULL) {
+            audio_streams = 0;
+            for (unsigned int i = 0; i < fmt_ctx->nb_streams; i++) {
+                if (fmt_ctx->streams[i]->codec_type == AVMEDIA_TYPE_AUDIO) {
+                    audio_streams++;
+                }
+            }
+        }
+        avformat_close_input(&fmt_ctx);
+    }
+
+    (*env)->ReleaseStringUTFChars(env, jpath, path);
+    return audio_streams;
+}

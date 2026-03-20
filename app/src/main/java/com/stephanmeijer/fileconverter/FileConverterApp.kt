@@ -50,6 +50,9 @@ fun FileConverterApp() {
             FFmpegEngine.initialize()
             converterViewModel.updateEngineReady(true)
             converterViewModel.updateConversionState(ConversionState.Idle)
+            try {
+                File(context.cacheDir, "output").listFiles()?.forEach { it.delete() }
+            } catch (_: Exception) {}
         } catch (e: Exception) {
             converterViewModel.updateConversionState(
                 ConversionState.Error("Engine init failed: ${e.message}")

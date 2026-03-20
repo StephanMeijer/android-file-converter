@@ -8,6 +8,7 @@ object FFmpegBridge {
     external fun nativeExecute(args: Array<String>): Int
     external fun nativeCancel()
     external fun nativeGetMediaDuration(path: String): Long
+    external fun nativeProbeStreams(path: String): Int
 
     @JvmStatic
     var progressCallback: ((Long) -> Unit)? = null
