@@ -5,7 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.InsertDriveFile
 import androidx.compose.material.icons.filled.Save
@@ -148,10 +148,10 @@ private fun FormatSelectionBar(
     inputFormat: String?, outputFormat: String?, isInputDetected: Boolean,
     onInputChanged: (String) -> Unit, onOutputChanged: (String) -> Unit
 ) {
-    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        FormatDropdown("From", inputFormat, FormatDetector.commonInputFormats, FormatDetector::getDisplayName, onInputChanged, Modifier.weight(1f), isDetected = isInputDetected)
-        Icon(Icons.Default.ArrowForward, "to", tint = MaterialTheme.colorScheme.onSurfaceVariant)
-        FormatDropdown("To", outputFormat, FormatDetector.commonOutputFormats, FormatDetector::getDisplayName, onOutputChanged, Modifier.weight(1f))
+    Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        FormatDropdown("From", inputFormat, FormatDetector.commonInputFormats, FormatDetector::getDisplayName, onInputChanged, Modifier.fillMaxWidth(), isDetected = isInputDetected)
+        Icon(Icons.Default.ArrowDownward, "to", tint = MaterialTheme.colorScheme.onSurfaceVariant)
+        FormatDropdown("To", outputFormat, FormatDetector.commonOutputFormats, FormatDetector::getDisplayName, onOutputChanged, Modifier.fillMaxWidth())
     }
 }
 

@@ -9,10 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Card
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -42,22 +39,9 @@ fun AboutScreenContent(modifier: Modifier = Modifier) {
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        // 1. App Header
         item {
-            Card(
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Column(
-                    modifier = Modifier.padding(16.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Info,
-                        contentDescription = "App Icon",
-                        modifier = Modifier
-                            .padding(bottom = 8.dp)
-                            .fillMaxWidth(),
-                        tint = MaterialTheme.colorScheme.primary
-                    )
+            Card(modifier = Modifier.fillMaxWidth()) {
+                Column(modifier = Modifier.padding(16.dp)) {
                     Text(
                         text = "File Converter",
                         style = MaterialTheme.typography.headlineMedium,
@@ -71,152 +55,43 @@ fun AboutScreenContent(modifier: Modifier = Modifier) {
                 }
             }
         }
-        
-        // 2. Powered by Pandoc
+
         item {
-            Card(
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Column(
-                    modifier = Modifier.padding(16.dp)
-                ) {
+            Card(modifier = Modifier.fillMaxWidth()) {
+                Column(modifier = Modifier.padding(16.dp)) {
                     Text(
-                        text = "Powered by Pandoc",
+                        text = "Pandoc",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold
                     )
-                    Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "This app uses Pandoc compiled to WebAssembly (WASM) for offline document conversion. " +
-                                "Pandoc runs entirely on your device without sending data to external servers.",
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "Pandoc Version: $pandocVersion",
+                        text = "Version $pandocVersion",
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                }
-            }
-        }
-        
-        // 3. Unmodified Binary
-        item {
-            Card(
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Column(
-                    modifier = Modifier.padding(16.dp)
-                ) {
-                    Text(
-                        text = "Unmodified Binary",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "Pandoc is included unmodified. No changes were made to Pandoc's source code or compiled binary.",
+                        text = "This app uses Pandoc for offline document conversion. " +
+                                "All conversions run entirely on your device — no data is sent to external servers.",
                         style = MaterialTheme.typography.bodySmall
                     )
-                }
-            }
-        }
-        
-        // 4. License
-        item {
-            Card(
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Column(
-                    modifier = Modifier.padding(16.dp)
-                ) {
+                    Spacer(modifier = Modifier.height(12.dp))
                     Text(
-                        text = "License",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "Pandoc is licensed under GPL-2.0-or-later. This means the software is free to use, modify, and distribute, " +
-                                "with the requirement that any modifications must also be made available under the same license.",
+                        text = "Pandoc is included unmodified. No changes were made to its source code or compiled binary.",
                         style = MaterialTheme.typography.bodySmall
                     )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "View full GPL-2.0-or-later license",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.clickable {
-                            uriHandler.openUri("https://www.gnu.org/licenses/old-licenses/gpl-2.0.html")
-                        }
-                    )
-                }
-            }
-        }
-        
-        // 5. Source Code
-        item {
-            Card(
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Column(
-                    modifier = Modifier.padding(16.dp)
-                ) {
-                    Text(
-                        text = "Source Code",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    LinkText(
-                        text = "Pandoc (Original)",
-                        url = "https://github.com/jgm/pandoc",
-                        uriHandler = uriHandler
-                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    LinkText("License", "https://github.com/jgm/pandoc/blob/master/COPYING.md", uriHandler)
                     Spacer(modifier = Modifier.height(4.dp))
-                    LinkText(
-                        text = "Pandoc WASM",
-                        url = "https://github.com/pandoc/pandoc-wasm",
-                        uriHandler = uriHandler
-                    )
+                    LinkText("Pandoc source code", "https://github.com/jgm/pandoc", uriHandler)
                     Spacer(modifier = Modifier.height(4.dp))
-                    LinkText(
-                        text = "Pandoc Official Website",
-                        url = "https://pandoc.org",
-                        uriHandler = uriHandler
-                    )
+                    LinkText("Pandoc WASM", "https://github.com/nicolomarcon/pandoc-wasm", uriHandler)
+                    Spacer(modifier = Modifier.height(4.dp))
+                    LinkText("pandoc.org", "https://pandoc.org", uriHandler)
                 }
             }
         }
-        
-        // 6. WASM Execution
-        item {
-            Card(
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Column(
-                    modifier = Modifier.padding(16.dp)
-                ) {
-                    Text(
-                        text = "WASM Execution",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "Powered by Jetpack JavaScriptEngine (V8)",
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "WASI compatibility provided by browser_wasi_shim",
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                }
-            }
-        }
-        
+
         item {
             Spacer(modifier = Modifier.height(16.dp))
         }
