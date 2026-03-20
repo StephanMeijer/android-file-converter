@@ -13,29 +13,29 @@ import androidx.compose.ui.platform.LocalContext
 @Composable
 fun rememberOutputSaver(
     onSaved: (Boolean) -> Unit
-): (String, String, String) -> Unit {
+): (String, String, ByteArray) -> Unit {
     val context = LocalContext.current
-    var pendingContent by remember { mutableStateOf<String?>(null) }
+    var pendingBytes by remember { mutableStateOf<ByteArray?>(null) }
 
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.CreateDocument("*/*")
     ) { uri: Uri? ->
-        if (uri != null && pendingContent != null) {
+        if (uri != null && pendingBytes != null) {
             try {
                 context.contentResolver.openOutputStream(uri)?.use { out ->
-                    out.write(pendingContent!!.toByteArray())
+                    out.write(pendingBytes!!)
                 }
                 onSaved(true)
             } catch (_: Exception) {
                 onSaved(false)
             }
         }
-        pendingContent = null
+        pendingBytes = null
     }
 
     return remember(launcher) {
-        { suggestedName: String, _: String, content: String ->
-            pendingContent = content
+        { suggestedName: String, _: String, bytes: ByteArray ->
+            pendingBytes = bytes
             launcher.launch(suggestedName)
         }
     }

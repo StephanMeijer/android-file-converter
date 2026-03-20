@@ -24,6 +24,7 @@ import kotlin.coroutines.resume
 private const val TAG = "PandocEngine"
 
 data class ConversionResult(
+    val outputBytes: ByteArray,
     val output: String,
     val warnings: List<String>,
     val error: String?,
@@ -36,7 +37,7 @@ data class PandocFormats(
 
 @Serializable
 private data class RawConversionResult(
-    val stdout: String,
+    val stdoutBase64: String,
     val stderr: String,
     val warnings: String,
 )
@@ -156,22 +157,36 @@ object PandocEngine {
             }
         } else emptyList()
 
+        val outputBytes = if (raw.stdoutBase64.isNotEmpty()) {
+            Base64.decode(raw.stdoutBase64, Base64.DEFAULT)
+        } else {
+            ByteArray(0)
+        }
+
         return ConversionResult(
-            output = raw.stdout,
+            outputBytes = outputBytes,
+            output = String(outputBytes, Charsets.UTF_8),
             warnings = warnings,
             error = raw.stderr.takeIf { it.isNotBlank() },
         )
     }
 
     private suspend fun evalJs(code: String): String = withContext(Dispatchers.Main) {
+        val wv = webView
+            ?: throw IllegalStateException("WebView has been destroyed — please restart the app")
         suspendCancellableCoroutine { cont ->
-            webView!!.evaluateJavascript(code) { result ->
-                val value = if (result != null && result.startsWith("\"") && result.endsWith("\"")) {
-                    json.decodeFromString<String>(result)
-                } else {
-                    result ?: "null"
+            try {
+                wv.evaluateJavascript(code) { result ->
+                    val value = if (result != null && result.startsWith("\"") && result.endsWith("\"")) {
+                        json.decodeFromString<String>(result)
+                    } else {
+                        result ?: "null"
+                    }
+                    cont.resume(value)
                 }
-                cont.resume(value)
+            } catch (e: Exception) {
+                initialized = false
+                cont.resume("")
             }
         }
     }

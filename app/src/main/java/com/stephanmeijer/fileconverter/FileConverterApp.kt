@@ -15,6 +15,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.stephanmeijer.fileconverter.engine.ConversionForegroundService
 import com.stephanmeijer.fileconverter.engine.PandocEngine
 import com.stephanmeijer.fileconverter.navigation.AboutScreen
 import com.stephanmeijer.fileconverter.navigation.ConverterScreen
@@ -37,6 +38,7 @@ fun FileConverterApp() {
 
     LaunchedEffect(Unit) {
         converterViewModel.updateConversionState(ConversionState.Initializing)
+        ConversionForegroundService.start(context)
         try {
             PandocEngine.initialize(context.applicationContext)
             converterViewModel.updateEngineReady(true)
@@ -45,6 +47,8 @@ fun FileConverterApp() {
             converterViewModel.updateConversionState(
                 ConversionState.Error("Engine init failed: ${e.message}")
             )
+        } finally {
+            ConversionForegroundService.stop(context)
         }
     }
 
@@ -63,6 +67,7 @@ fun FileConverterApp() {
                 onConvert = {
                     scope.launch {
                         converterViewModel.updateConversionState(ConversionState.Converting)
+                        ConversionForegroundService.start(context)
                         try {
                              val file = converterViewModel.selectedFile!!
                              val inputBytes = file.cachedPath.readBytes()
@@ -84,6 +89,8 @@ fun FileConverterApp() {
                             converterViewModel.updateConversionState(
                                 ConversionState.Error("Conversion failed: ${e.message}")
                             )
+                        } finally {
+                            ConversionForegroundService.stop(context)
                         }
                     }
                 },
@@ -98,7 +105,7 @@ fun FileConverterApp() {
                         val mime = MimeTypes.forFormat(
                             converterViewModel.outputFormat!!
                         )
-                        saveOutput("$inputName.$ext", mime, state.result.output)
+                        saveOutput("$inputName.$ext", mime, state.result.outputBytes)
                     }
                 },
                 modifier = Modifier.fillMaxSize()

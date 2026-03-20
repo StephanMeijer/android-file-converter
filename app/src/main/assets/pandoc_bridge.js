@@ -144,7 +144,7 @@ function pandocConvert(optionsJson, stdinStr) {
       // Non-zero exit — still return what we have
       var errText = new TextDecoder("utf-8", { fatal: false }).decode(err_file.data);
       return JSON.stringify({
-        stdout: "",
+        stdoutBase64: "",
         stderr: errText,
         warnings: "[]",
         exitCode: e.code
@@ -154,7 +154,7 @@ function pandocConvert(optionsJson, stdinStr) {
     }
   }
 
-  var stdout = new TextDecoder("utf-8", { fatal: false }).decode(out_file.data);
+  var stdoutBytes = out_file.data;
   var stderr = new TextDecoder("utf-8", { fatal: false }).decode(err_file.data);
   var rawWarnings = new TextDecoder("utf-8", { fatal: false }).decode(warnings_file.data);
 
@@ -163,8 +163,19 @@ function pandocConvert(optionsJson, stdinStr) {
     warnings = rawWarnings;
   }
 
+  var stdoutBase64 = '';
+  if (stdoutBytes && stdoutBytes.length > 0) {
+    var binaryStr = '';
+    var chunkSize = 8192;
+    for (var i = 0; i < stdoutBytes.length; i += chunkSize) {
+      var chunk = stdoutBytes.subarray(i, Math.min(i + chunkSize, stdoutBytes.length));
+      binaryStr += String.fromCharCode.apply(null, chunk);
+    }
+    stdoutBase64 = btoa(binaryStr);
+  }
+
   return JSON.stringify({
-    stdout: stdout,
+    stdoutBase64: stdoutBase64,
     stderr: stderr,
     warnings: warnings
   });
@@ -203,7 +214,7 @@ function pandocConvertBytes(optionsJson, inputBytes) {
     } else if (e instanceof WASIProcExit) {
       var errText = new TextDecoder("utf-8", { fatal: false }).decode(err_file.data);
       return JSON.stringify({
-        stdout: "",
+        stdoutBase64: "",
         stderr: errText,
         warnings: "[]",
         exitCode: e.code
@@ -213,7 +224,7 @@ function pandocConvertBytes(optionsJson, inputBytes) {
     }
   }
 
-  var stdout = new TextDecoder("utf-8", { fatal: false }).decode(out_file.data);
+  var stdoutBytes = out_file.data;
   var stderr = new TextDecoder("utf-8", { fatal: false }).decode(err_file.data);
   var rawWarnings = new TextDecoder("utf-8", { fatal: false }).decode(warnings_file.data);
 
@@ -222,8 +233,19 @@ function pandocConvertBytes(optionsJson, inputBytes) {
     warnings = rawWarnings;
   }
 
+  var stdoutBase64 = '';
+  if (stdoutBytes && stdoutBytes.length > 0) {
+    var binaryStr = '';
+    var chunkSize = 8192;
+    for (var i = 0; i < stdoutBytes.length; i += chunkSize) {
+      var chunk = stdoutBytes.subarray(i, Math.min(i + chunkSize, stdoutBytes.length));
+      binaryStr += String.fromCharCode.apply(null, chunk);
+    }
+    stdoutBase64 = btoa(binaryStr);
+  }
+
   return JSON.stringify({
-    stdout: stdout,
+    stdoutBase64: stdoutBase64,
     stderr: stderr,
     warnings: warnings
   });
