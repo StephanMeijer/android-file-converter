@@ -17,6 +17,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.stephanmeijer.fileconverter.engine.ConversionForegroundService
 import com.stephanmeijer.fileconverter.engine.PandocEngine
+import com.stephanmeijer.fileconverter.engine.SelectedFile
 import com.stephanmeijer.fileconverter.navigation.AboutScreen
 import com.stephanmeijer.fileconverter.navigation.ConverterScreen
 import com.stephanmeijer.fileconverter.ui.components.MimeTypes
@@ -30,7 +31,7 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FileConverterApp() {
+fun FileConverterApp(initialFile: SelectedFile? = null) {
     val navController = rememberNavController()
     val converterViewModel: ConverterViewModel = viewModel()
     val context = LocalContext.current
@@ -50,6 +51,10 @@ fun FileConverterApp() {
         } finally {
             ConversionForegroundService.stop(context)
         }
+    }
+
+    LaunchedEffect(initialFile) {
+        initialFile?.let { converterViewModel.onFilePicked(it) }
     }
 
     Surface(
