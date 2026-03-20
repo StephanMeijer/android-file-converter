@@ -8,6 +8,7 @@ plugins {
 android {
     namespace = "com.stephanmeijer.fileconverter"
     compileSdk = 35
+    ndkVersion = "28.0.12433566"
 
     defaultConfig {
         applicationId = "com.stephanmeijer.fileconverter"
@@ -15,6 +16,10 @@ android {
         targetSdk = 35
         versionCode = 1
         versionName = "1.0.0"
+
+        ndk {
+            abiFilters += "arm64-v8a"
+        }
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -54,6 +59,13 @@ android {
     testOptions {
         unitTests.all {
             it.useJUnitPlatform()
+        }
+    }
+
+    externalNativeBuild {
+        cmake {
+            path = file("src/main/cpp/CMakeLists.txt")
+            version = "3.22.1"
         }
     }
 }
