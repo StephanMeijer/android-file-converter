@@ -48,8 +48,12 @@ fun FileConverterApp() {
         }
     }
 
-    NavHost(navController = navController, startDestination = ConverterScreen) {
-        composable<ConverterScreen> {
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background
+    ) {
+        NavHost(navController = navController, startDestination = ConverterScreen) {
+            composable<ConverterScreen> {
             val pickFile = rememberFilePicker(onFilePicked = converterViewModel::onFilePicked)
             val saveOutput = rememberOutputSaver { _ -> }
             ConverterScreenContent(
@@ -115,6 +119,7 @@ fun FileConverterApp() {
             ) { padding ->
                 AboutScreenContent(modifier = Modifier.padding(padding))
             }
+        }
         }
     }
 }

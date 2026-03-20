@@ -32,14 +32,18 @@ fun ConverterScreenContent(
     onSave: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .statusBarsPadding()
-            .padding(horizontal = 16.dp)
-            .padding(bottom = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+    Surface(
+        modifier = modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background
     ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .statusBarsPadding()
+                .padding(horizontal = 16.dp)
+                .padding(bottom = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
         // Top row: title + info icon
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -105,6 +109,7 @@ fun ConverterScreenContent(
                 }
             }
             is ConversionState.Idle -> {}
+        }
         }
     }
 }

@@ -129,7 +129,7 @@ object PandocEngine {
 
         val escapedFrom = json.encodeToString(String.serializer(), fromFormat)
         val escapedTo = json.encodeToString(String.serializer(), toFormat)
-        val optionsJson = """{"from":$escapedFrom,"to":$escapedTo${if (standalone) ""","standalone":true""" else ""},"files":["/stdin"]}"""
+        val optionsJson = """{"from":$escapedFrom,"to":$escapedTo${if (standalone) ""","standalone":true""" else ""},"input-files":["/stdin"]}"""
 
         val inputBase64 = Base64.encodeToString(input.toByteArray(Charsets.UTF_8), Base64.NO_WRAP)
         val escapedOptions = optionsJson.replace("\\", "\\\\").replace("'", "\\'")
