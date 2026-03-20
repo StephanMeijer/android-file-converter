@@ -54,6 +54,17 @@ object MimeTypes {
         "plain" -> "text/plain"
         "rtf" -> "application/rtf"
         "pptx" -> "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+        "mp3" -> "audio/mpeg"
+        "aac" -> "audio/aac"
+        "m4a" -> "audio/mp4"
+        "wav" -> "audio/wav"
+        "flac" -> "audio/flac"
+        "ogg" -> "audio/ogg"
+        "opus" -> "audio/opus"
+        "mp4" -> "video/mp4"
+        "mkv" -> "video/x-matroska"
+        "mov" -> "video/quicktime"
+        "webm" -> "video/webm"
         else -> "application/octet-stream"
     }
 
@@ -71,6 +82,17 @@ object MimeTypes {
         "pptx" -> "pptx"
         "typst" -> "typ"
         "org" -> "org"
+        "mp3" -> "mp3"
+        "aac" -> "aac"
+        "m4a" -> "m4a"
+        "wav" -> "wav"
+        "flac" -> "flac"
+        "ogg" -> "ogg"
+        "opus" -> "opus"
+        "mp4" -> "mp4"
+        "mkv" -> "mkv"
+        "mov" -> "mov"
+        "webm" -> "webm"
         else -> format
     }
 }

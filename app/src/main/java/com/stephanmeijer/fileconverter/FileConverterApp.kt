@@ -66,7 +66,7 @@ fun FileConverterApp() {
                 onNavigateToAbout = { navController.navigate(AboutScreen) },
                 onConvert = {
                     scope.launch {
-                        converterViewModel.updateConversionState(ConversionState.Converting)
+                        converterViewModel.updateConversionState(ConversionState.Converting())
                         ConversionForegroundService.start(context)
                         try {
                              val file = converterViewModel.selectedFile!!

@@ -109,6 +109,11 @@ fun ConverterScreenContent(
                 }
             }
             is ConversionState.Idle -> {}
+            is ConversionState.Cancelled -> {
+                ElevatedCard(modifier = Modifier.fillMaxWidth()) {
+                    Text("Conversion cancelled.", Modifier.padding(16.dp))
+                }
+            }
         }
         }
     }
