@@ -14,7 +14,7 @@ android {
     compileSdk = 35
 
     // Compute versionCode from versionName using formula: major*10000 + minor*100 + patch
-    val versionNameStr = "1.0.0"
+    val versionNameStr = "1.0.1"
     val versionParts = versionNameStr.split(".").map { it.toInt() }
     val computedVersionCode = versionParts[0] * 10000 + versionParts[1] * 100 + versionParts[2]
 
@@ -63,6 +63,9 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            ndk {
+                debugSymbolLevel = "FULL"
+            }
         }
     }
 
