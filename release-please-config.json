@@ -1,0 +1,16 @@
+{
+  "packages": {
+    ".": {
+      "release-type": "simple",
+      "bump-minor-pre-major": true,
+      "bump-patch-for-minor-pre-major": true,
+      "extra-files": [
+        {
+          "type": "generic",
+          "path": "app/build.gradle.kts",
+          "search-pattern": "val versionNameStr = \"([0-9]+\\.[0-9]+\\.[0-9]+)\""
+        }
+      ]
+    }
+  }
+}

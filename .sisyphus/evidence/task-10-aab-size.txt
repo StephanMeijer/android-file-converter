@@ -1,0 +1,31 @@
+Task 10: AAB Size Verification
+================================
+Date: 2026-03-25
+Tool: bundletool 1.18.3 (google/bundletool standalone jar)
+
+AAB File
+--------
+Path: app/build/outputs/bundle/release/app-release.aab
+Size: 19,732,803 bytes (19MB)
+
+Bundletool get-size total
+-------------------------
+Command: java -jar bundletool.jar get-size total --apks=/tmp/app-release.apks
+Output:
+  MIN,MAX
+  17259726,17259726
+
+Compressed download size: 17,259,726 bytes (~16.5MB)
+
+Universal APK (--mode=universal)
+---------------------------------
+APKS archive: 17,685,904 bytes (~17MB)
+Extracted universal.apk: ~17MB
+
+Verdict
+-------
+PASS: 17,259,726 bytes << 200,000,000 bytes (200MB Play Store limit)
+
+Note: This is an unsigned AAB (no signing env vars). Signed AAB will be
+approximately the same size. The bundletool build-apks signed with the
+debug keystore for device testing.

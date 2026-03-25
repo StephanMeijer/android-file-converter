@@ -1,0 +1,30 @@
+File Converter is a privacy-first document conversion app that puts you in control of your data.
+
+PRIVACY FIRST
+All file conversion happens entirely on your device using WebAssembly-powered Pandoc. Your files never leave your phone. No uploads, no cloud processing, no data collection. We don't track you, and we can't access your files.
+
+POWERFUL FORMAT SUPPORT
+Convert between dozens of document formats:
+• Markdown, HTML, DOCX (Word), EPUB, LaTeX, RTF, ODT
+• ReStructuredText, AsciiDoc, Typst, Jupyter Notebooks
+• JSON, CSV, and many more
+
+Whether you're converting a Word document to Markdown, an EPUB to PDF, or a Jupyter notebook to HTML, File Converter handles it with precision.
+
+WORKS OFFLINE
+No internet connection required. All processing happens locally on your device, making it fast and reliable even without network access.
+
+SEAMLESS INTEGRATION
+• Receive files from other apps via share intent
+• Convert and share results to any app on your device
+• Works with your favorite file managers and email clients
+
+OPEN SOURCE & TRANSPARENT
+The source code is publicly available for review. You can audit exactly what the app does with your files. No hidden behavior, no proprietary black boxes.
+
+SIMPLE & INTUITIVE
+Clean, straightforward interface. Select your input file, choose the output format, and convert. No complicated settings or confusing options.
+
+Get started today and experience document conversion that respects your privacy.
+
+For more information, see our privacy policy at: https://github.com/StephanMeijer/android-file-converter/blob/main/PRIVACY.md

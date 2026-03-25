@@ -22,3 +22,9 @@ tools/pandoc.wasm
 # Build outputs
 app/build/
 app/.cxx/
+
+# Keystore files (must never be committed)
+*.keystore
+*.jks
+keystore.b64
+*.p12
