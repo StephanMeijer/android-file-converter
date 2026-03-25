@@ -12,12 +12,17 @@ android {
     namespace = "com.stephanmeijer.fileconverter"
     compileSdk = 35
 
+    // Compute versionCode from versionName using formula: major*10000 + minor*100 + patch
+    val versionNameStr = "1.0.0"
+    val versionParts = versionNameStr.split(".").map { it.toInt() }
+    val computedVersionCode = versionParts[0] * 10000 + versionParts[1] * 100 + versionParts[2]
+
     defaultConfig {
         applicationId = "com.stephanmeijer.fileconverter"
         minSdk = 26
         targetSdk = 35
-        versionCode = 1
-        versionName = "1.0.0"
+        versionCode = computedVersionCode
+        versionName = versionNameStr
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
