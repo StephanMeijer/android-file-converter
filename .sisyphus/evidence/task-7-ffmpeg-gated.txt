@@ -1,0 +1,57 @@
+T7 Verification: App is already Pandoc-only (no FFmpeg gating needed)
+
+Engine directory contents:
+-rw-r--r-- 1 steve steve 2066 Mar 25 20:24 ConversionForegroundService.kt
+-rw-r--r-- 1 steve steve 1207 Mar 25 20:24 FileProcessor.kt
+-rw-r--r-- 1 steve steve 3439 Mar 25 20:24 FormatDetector.kt
+-rw-r--r-- 1 steve steve 7211 Mar 25 20:24 PandocEngine.kt
+-rw-r--r-- 1 steve steve  219 Mar 25 20:24 SelectedFile.kt
+
+(No ConversionRouter.kt, FFmpegBridge.kt, FFmpegEngine.kt, FFmpegCommandBuilder.kt, etc.)
+
+FormatDetector.commonInputFormats:
+- markdown
+- html
+- latex
+- docx
+- odt
+- epub
+- rst
+- org
+- csv
+- json
+- ipynb
+- rtf
+- asciidoc
+- typst
+
+FormatDetector.commonOutputFormats:
+- html
+- markdown
+- latex
+- docx
+- odt
+- epub
+- rst
+- plain
+- org
+- json
+- ipynb
+- rtf
+- asciidoc
+- typst
+- pptx
+- revealjs
+- beamer
+
+ConverterViewModel.kt routing:
+- No FFmpeg references
+- Routes all conversions through PandocEngine only
+- State management is format-agnostic (no engine selection logic)
+
+FFmpeg grep result:
+No FFmpeg references found
+
+CONCLUSION: main branch is already v1.0-safe. No FFmpeg code exists, 
+no audio/video formats are exposed, all conversion routes to PandocEngine.
+All formats are document/markup formats supported by Pandoc.
