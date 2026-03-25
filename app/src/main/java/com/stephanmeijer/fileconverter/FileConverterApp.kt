@@ -23,6 +23,7 @@ import com.stephanmeijer.fileconverter.navigation.ConverterScreen
 import com.stephanmeijer.fileconverter.ui.components.MimeTypes
 import com.stephanmeijer.fileconverter.ui.components.rememberFilePicker
 import com.stephanmeijer.fileconverter.ui.components.rememberOutputSaver
+import com.stephanmeijer.fileconverter.ui.components.rememberShareHandler
 import com.stephanmeijer.fileconverter.ui.screens.AboutScreenContent
 import com.stephanmeijer.fileconverter.ui.screens.ConverterScreenContent
 import com.stephanmeijer.fileconverter.ui.viewmodel.ConversionState
@@ -63,9 +64,10 @@ fun FileConverterApp(initialFile: SelectedFile? = null) {
     ) {
         NavHost(navController = navController, startDestination = ConverterScreen) {
             composable<ConverterScreen> {
-            val pickFile = rememberFilePicker(onFilePicked = converterViewModel::onFilePicked)
-            val saveOutput = rememberOutputSaver { _ -> }
-            ConverterScreenContent(
+             val pickFile = rememberFilePicker(onFilePicked = converterViewModel::onFilePicked)
+             val saveOutput = rememberOutputSaver { _ -> }
+             val shareOutput = rememberShareHandler()
+             ConverterScreenContent(
                 viewModel = converterViewModel,
                 onPickFile = pickFile,
                 onNavigateToAbout = { navController.navigate(AboutScreen) },
@@ -110,10 +112,24 @@ fun FileConverterApp(initialFile: SelectedFile? = null) {
                         val mime = MimeTypes.forFormat(
                             converterViewModel.outputFormat!!
                         )
-                        saveOutput("$inputName.$ext", mime, state.result.outputBytes)
-                    }
-                },
-                modifier = Modifier.fillMaxSize()
+                         saveOutput("$inputName.$ext", mime, state.result.outputBytes)
+                     }
+                 },
+                 onShare = {
+                     val state = converterViewModel.conversionState
+                     if (state is ConversionState.Success) {
+                         val inputName = converterViewModel.selectedFile!!
+                             .displayName.substringBeforeLast('.')
+                         val ext = MimeTypes.extensionForFormat(
+                             converterViewModel.outputFormat!!
+                         )
+                         val mime = MimeTypes.forFormat(
+                             converterViewModel.outputFormat!!
+                         )
+                         shareOutput("$inputName.$ext", mime, state.result.outputBytes)
+                     }
+                 },
+                 modifier = Modifier.fillMaxSize()
             )
         }
         composable<AboutScreen> {
