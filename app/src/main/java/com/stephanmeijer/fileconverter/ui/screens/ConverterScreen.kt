@@ -95,10 +95,6 @@ fun ConverterScreenContent(
                 ElevatedCard(colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.primaryContainer), modifier = Modifier.fillMaxWidth()) {
                     Column(Modifier.padding(16.dp)) {
                         Text("Conversion complete!", color = MaterialTheme.colorScheme.onPrimaryContainer, style = MaterialTheme.typography.titleMedium)
-                        if (state.result.warnings.isNotEmpty()) {
-                            Spacer(Modifier.height(4.dp))
-                            Text("Warnings: ${state.result.warnings.size}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f))
-                        }
                         Spacer(Modifier.height(8.dp))
                          Row(
                              Modifier.fillMaxWidth(),
