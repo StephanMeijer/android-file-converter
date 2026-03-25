@@ -1,4 +1,5 @@
 import java.net.URI
+import java.util.Base64
 import java.util.zip.ZipFile
 
 plugins {
@@ -30,8 +31,32 @@ android {
         }
     }
 
+    // ---- Release signing (reads from environment variables for CI/CD) ----
+    // Generate upload keystore locally:
+    //   keytool -genkeypair -v -storetype PKCS12 -keystore upload.keystore -alias upload -keyalg RSA -keysize 2048 -validity 10000
+    // Base64 encode: base64 -w 0 upload.keystore > keystore.b64
+    // Add to GitHub Secrets: KEYSTORE_BASE64, KEYSTORE_PASSWORD, KEY_ALIAS, KEY_PASSWORD
+    signingConfigs {
+        create("release") {
+            val keystoreBase64 = System.getenv("KEYSTORE_BASE64")
+            if (keystoreBase64 != null) {
+                val keystoreFile = layout.buildDirectory.get().asFile.resolve("release.keystore")
+                keystoreFile.parentFile.mkdirs()
+                keystoreFile.writeBytes(Base64.getDecoder().decode(keystoreBase64))
+                storeFile = keystoreFile
+                storePassword = System.getenv("KEYSTORE_PASSWORD") ?: ""
+                keyAlias = System.getenv("KEY_ALIAS") ?: ""
+                keyPassword = System.getenv("KEY_PASSWORD") ?: ""
+            }
+        }
+    }
+
     buildTypes {
         release {
+            val keystoreBase64 = System.getenv("KEYSTORE_BASE64")
+            if (keystoreBase64 != null) {
+                signingConfig = signingConfigs.getByName("release")
+            }
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
