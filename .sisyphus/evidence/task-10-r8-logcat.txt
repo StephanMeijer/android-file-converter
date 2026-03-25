@@ -1,0 +1,54 @@
+Task 10: R8 Logcat Verification
+=================================
+Date: 2026-03-25
+Device: OnePlus DN2103 (API 33, Android 13)
+Device ID: adb-CIDMUOX8T855BIL7-7hqOAf._adb-tls-connect._tcp
+APK: universal.apk from release AAB (debug-keystore signed via bundletool)
+
+Installation
+------------
+$ adb uninstall com.stephanmeijer.fileconverter
+Success
+$ adb install /tmp/universal.apk
+Performing Streamed Install
+Success
+
+Launch (fresh, after force-stop + logcat clear)
+------------------------------------------------
+$ adb shell am force-stop com.stephanmeijer.fileconverter
+$ adb logcat -c
+$ adb shell am start -n com.stephanmeijer.fileconverter/.MainActivity
+Starting: Intent { cmp=com.stephanmeijer.fileconverter/.MainActivity }
+
+Logcat (after 8s wait for pandoc.wasm init)
+--------------------------------------------
+Filter: grep -iE "PandocEngine|ClassNotFoundException|NoSuchMethodError|
+  NoSuchFieldError|UnsatisfiedLinkError|FATAL|pandoc|JavascriptInterface|crash"
+
+03-25 20:50:29.234 I PandocEngine: Pandoc initialized: ok
+03-25 20:50:29.236 I PandocEngine: PandocEngine ready
+
+Activity lifecycle:
+03-25 20:50:27.138 I ActivityManager: Start proc 25044:com.stephanmeijer.fileconverter/u0a546
+  for top-activity {com.stephanmeijer.fileconverter/.MainActivity}
+
+R8 Error Check
+--------------
+ClassNotFoundException:  NONE
+NoSuchMethodError:       NONE
+NoSuchFieldError:        NONE
+UnsatisfiedLinkError:    NONE
+FATAL exceptions:        NONE
+Crash reports:           NONE
+
+PandocEngine Initialization
+---------------------------
+- WebView loaded (v146.0.7680.119)
+- PandocEngine.init() completed: "Pandoc initialized: ok"
+- PandocEngine ready signal received (~2s after launch)
+- @JavascriptInterface bridge methods NOT stripped by R8
+
+Verdict
+-------
+PASS: App launches cleanly. WebView initializes. PandocEngine starts.
+R8 keep rules working correctly — no classes or methods stripped.
