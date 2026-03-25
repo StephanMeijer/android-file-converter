@@ -1,3 +1,6 @@
+import java.net.URI
+import java.util.zip.ZipFile
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -50,6 +53,50 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+}
+
+// ---------------------------------------------------------------------------
+// Auto-download pandoc.wasm from GitHub releases if not already present.
+// Version is read from app/src/main/assets/PANDOC_VERSION.txt so bumping
+// the version file is all that's needed to pull a new binary on next build.
+// ---------------------------------------------------------------------------
+val pandocVersionFile = file("src/main/assets/PANDOC_VERSION.txt")
+val pandocWasmFile    = file("src/main/assets/pandoc.wasm")
+
+tasks.register("downloadPandocWasm") {
+    description = "Downloads pandoc.wasm from jgm/pandoc GitHub releases if absent"
+    group       = "build setup"
+
+    inputs.file(pandocVersionFile)
+    outputs.file(pandocWasmFile)
+
+    doLast {
+        if (pandocWasmFile.exists()) {
+            println("pandoc.wasm already present — skipping download")
+            return@doLast
+        }
+
+        val version = pandocVersionFile.readText().trim()
+        val url     = "https://github.com/jgm/pandoc/releases/download/$version/pandoc.wasm.zip"
+        println("Downloading pandoc.wasm $version …")
+
+        val tmpZip = File(temporaryDir, "pandoc.wasm.zip")
+        URI(url).toURL().openStream().use { it.copyTo(tmpZip.outputStream()) }
+
+        ZipFile(tmpZip).use { zip ->
+            val entry = zip.getEntry("pandoc.wasm")
+                ?: error("pandoc.wasm not found inside $url")
+            pandocWasmFile.parentFile.mkdirs()
+            zip.getInputStream(entry).use { it.copyTo(pandocWasmFile.outputStream()) }
+        }
+        tmpZip.delete()
+
+        println("pandoc.wasm ready  (${pandocWasmFile.length() / 1_048_576} MB)")
+    }
+}
+
+tasks.named("preBuild") {
+    dependsOn("downloadPandocWasm")
 }
 
 dependencies {
