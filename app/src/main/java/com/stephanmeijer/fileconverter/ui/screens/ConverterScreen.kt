@@ -9,6 +9,7 @@ import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.InsertDriveFile
 import androidx.compose.material.icons.filled.Save
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.SwapHoriz
 import androidx.compose.material.icons.filled.UploadFile
 import androidx.compose.material3.*
@@ -30,6 +31,7 @@ fun ConverterScreenContent(
     onNavigateToAbout: () -> Unit = {},
     onConvert: () -> Unit,
     onSave: () -> Unit = {},
+    onShare: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Surface(
@@ -93,18 +95,22 @@ fun ConverterScreenContent(
                 ElevatedCard(colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.primaryContainer), modifier = Modifier.fillMaxWidth()) {
                     Column(Modifier.padding(16.dp)) {
                         Text("Conversion complete!", color = MaterialTheme.colorScheme.onPrimaryContainer, style = MaterialTheme.typography.titleMedium)
-                        if (state.result.warnings.isNotEmpty()) {
-                            Spacer(Modifier.height(4.dp))
-                            Text("Warnings: ${state.result.warnings.size}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f))
-                        }
                         Spacer(Modifier.height(8.dp))
-                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                            FilledTonalButton(onClick = onSave) {
-                                Icon(Icons.Default.Save, contentDescription = null, Modifier.size(18.dp))
-                                Spacer(Modifier.width(4.dp))
-                                Text("Save")
-                            }
-                        }
+                         Row(
+                             Modifier.fillMaxWidth(),
+                             horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End)
+                         ) {
+                             FilledTonalButton(onClick = onShare) {
+                                 Icon(Icons.Default.Share, contentDescription = null, Modifier.size(18.dp))
+                                 Spacer(Modifier.width(4.dp))
+                                 Text("Share")
+                             }
+                             FilledTonalButton(onClick = onSave) {
+                                 Icon(Icons.Default.Save, contentDescription = null, Modifier.size(18.dp))
+                                 Spacer(Modifier.width(4.dp))
+                                 Text("Save")
+                             }
+                         }
                     }
                 }
             }
